@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hybrid E-Commerce Intelligence</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { --p: #4361ee; --s: #2ecc71; --d: #ef233c; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: #333; }
+        .header { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; padding: 40px; text-align: center; }
+        .main-container { max-width: 1300px; margin: -30px auto 40px; display: grid; grid-template-columns: 1fr 2fr; gap: 20px; padding: 0 20px; }
+        .card { background: white; border-radius: 15px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid #eef; }
+        .btn { width: 100%; padding: 15px; border-radius: 10px; border: none; background: var(--p); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+        select, textarea { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 15px; font-family: inherit; }
+        .result-box { text-align: center; border: 2px dashed #eee; padding: 20px; border-radius: 12px; min-height: 480px; }
+        .footer { text-align: center; padding: 30px; color: #555; background: #fff; border-top: 1px solid #eee; margin-top: 20px; font-weight: 600; }
+        .pie-charts-row { display: flex; gap: 20px; justify-content: center; margin-top: 20px; }
+        .word-gucha-row { width: 95%; margin: 30px auto 0; padding: 20px; background: #fff; border-radius: 10px; border: 1px solid #f0f0f0; }
+        .chart-wrapper { height: 400px; position: relative; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Sentiment Analysis and Churn Prediction for E-Commerce using Hybrid NLP Architecture</h1>
+</div>
+
+<div class="main-container">
+    <div class="card">
+        <h2>Input Console</h2>
+        <form action="/predict" method="post">
+            <select name="category">
+                <option value="General">None / General Analysis</option>
+                <option>Electronics</option><option>Fashion</option><option>Health & Beauty</option>
+                <option>Home & Kitchen</option><option>Grocery</option><option>Toys & Games</option>
+                <option>Automotive</option><option>Books</option>
+            </select>
+            <textarea name="review" rows="5" placeholder="Enter single review here..." required>{{original_review}}</textarea>
+            <button type="submit" class="btn">Analyze Review</button>
+        </form>
+        <hr style="margin: 30px 0;">
+        <h2>Batch Processing</h2>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <select name="category">
+                <option value="General">None / General Analysis</option>
+                <option>Electronics</option><option>Fashion</option><option>Health & Beauty</option>
+                <option>Home & Kitchen</option><option>Grocery</option><option>Toys & Games</option>
+                <option>Automotive</option><option>Books</option>
+            </select>
+            <input type="file" name="file" accept=".csv" required><br><br>
+            <button type="submit" class="btn" style="background: #2b2d42;">Upload & Process CSV</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Intelligence Dashboard</h2>
+        <div class="result-box">
+            {% if prediction_text %}
+                <h1 style="color: {{res_color}}; font-size: 3.8rem; margin: 0;">{{ prediction_text }}</h1>
+                <p style="font-size: 1.3rem;">Status: <strong>{{ status_text }}</strong> ({{selected_cat}})</p>
+                <div style="display: flex; justify-content: space-around; margin-top: 40px; background: #f8faff; padding: 25px; border-radius: 12px;">
+                    <div><small>Lexicon Score</small><br><strong style="font-size: 1.6rem;">{{ lex_val }}</strong></div>
+                    <div style="border-left: 1px solid #ddd; padding-left: 20px;">
+                        <small>Churn Probability</small><br><strong style="font-size: 1.6rem;">{{ ml_val }}%</strong>
+                    </div>
+                </div>
+            {% elif batch_done %}
+                <h3>Batch Intelligence Results: {{cat}}</h3>
+                <div class="pie-charts-row">
+                    <div style="width: 45%;"><canvas id="churnChart"></canvas></div>
+                    <div style="width: 45%;"><canvas id="lexiconChart"></canvas></div>
+                </div>
+
+                <div class="word-gucha-row">
+                    <h3 style="font-size: 1.1rem; color: #4361ee; margin-bottom: 15px; text-align: left;">Most Frequent Keywords (Word Gucha)</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="wordGuchaChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- ✅ DOWNLOAD BUTTON ADDED HERE (exactly as requested) -->
+                <div style="margin-top: 20px; text-align: center;">
+                    <a href="/download_result" class="btn" style="background: #2ecc71; text-decoration: none; display: inline-block; width: auto; padding: 10px 25px;">
+                        ⬇️ Download Results CSV
+                    </a>
+                </div>
+
+                <div style="margin-top: 25px; background: #f0f4ff; padding: 15px; border-radius: 8px;">
+                    Total Reviews: <strong>{{total}}</strong> | ML Predicted Churn Risk: <span style="color:var(--d)">{{churns}}</span>
+                </div>
+            {% else %}
+                <div style="margin-top: 180px; color: #bbb;">
+                    <i>Dashboard ready for data processing.</i>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    Institute of Computing - BS(Data Science) FYP - MNS University of Agriculture, Multan
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        {% if batch_done %}
+        new Chart(document.getElementById('churnChart'), {
+            type: 'pie',
+            data: {
+                labels: ['Stay', 'Churn'],
+                datasets: [{ data: [{{stays}}, {{churns}}], backgroundColor: ['#2ecc71', '#ef233c'] }]
+            },
+            options: { responsive: true, plugins: { title: { display: true, text: 'ML Churn Status' } } }
+        });
+
+        new Chart(document.getElementById('lexiconChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Pos', 'Neg', 'Neu'],
+                datasets: [{ data: [{{pos}}, {{neg}}, {{neu}}], backgroundColor: ['#2ecc71', '#ef233c', '#f39c12'] }]
+            },
+            options: { responsive: true, plugins: { title: { display: true, text: 'Lexicon Polarity Analysis' } } }
+        });
+
+        new Chart(document.getElementById('wordGuchaChart'), {
+            type: 'bar',
+            data: {
+                labels: {{ word_labels|tojson }},
+                datasets: [{ 
+                    label: 'Word Count', 
+                    data: {{ word_values|tojson }}, 
+                    backgroundColor: 'rgba(67, 97, 238, 0.8)',
+                    borderColor: 'rgba(67, 97, 238, 1)',
+                    borderWidth: 1,
+                    borderRadius: 5,
+                    barThickness: 20
+                }]
+            },
+            options: { 
+                indexAxis: 'y', 
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { display: false }
+                },
+                scales: {
+                    x: { 
+                        beginAtZero: true,
+                        grid: { display: false } 
+                    },
+                    y: { 
+                        grid: { display: false },
+                        ticks: { font: { size: 12, weight: 'bold' } }
+                    }
+                }
+            }
+        });
+        {% endif %}
+    });
+</script>
+</body>
+</html>
