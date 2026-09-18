@@ -8,8 +8,9 @@ import re
 
 app = Flask(__name__)
 
-# ✅ YAHAN SIRF YEH LINE CHANGE HUI HAI
-BASE_PATH = r'D:\Users\ans\Desktop\CS-604 FYP\Final Year Project'
+# Load model/vectorizer from the same directory as this script,
+# so the app works no matter where it's cloned/deployed (not just on this PC).
+BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 
 model = joblib.load(os.path.join(BASE_PATH, 'hybrid_model.pkl'))
 vectorizer = joblib.load(os.path.join(BASE_PATH, 'tfidf_vectorizer.pkl'))
