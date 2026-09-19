@@ -1,6 +1,5 @@
 # Sentiment Analysis & Churn Prediction for E-Commerce — Hybrid NLP Architecture
 
-**Final Year Project — BS Data Science, MNS University of Agriculture, Multan**
 
 Predicts customer churn risk directly from the text of a product review — no purchase history or demographics required — using a stacking ensemble of three models, deployed as a live web dashboard.
 
