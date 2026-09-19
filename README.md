@@ -1,3 +1,13 @@
+---
+title: Sentiment Analysis and Churn Prediction
+emoji: 📊
+colorFrom: blue
+colorTo: purple
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # Sentiment Analysis & Churn Prediction for E-Commerce — Hybrid NLP Architecture
 
 **Final Year Project — BS Data Science, MNS University of Agriculture, Multan**
@@ -24,6 +34,7 @@ Most sentiment-analysis portfolio projects stop at "positive vs. negative." This
 ├── hybrid_model.pkl                   # Trained stacking ensemble
 ├── tfidf_vectorizer.pkl               # Fitted TF-IDF vectorizer
 ├── sample_reviews.csv                 # 300-row sample for quick testing (full dataset below)
+├── Dockerfile                         # Container build for Hugging Face Spaces
 ├── requirements.txt
 └── .gitignore
 ```
